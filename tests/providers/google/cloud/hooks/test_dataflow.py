@@ -1315,16 +1315,20 @@ class TestDataflowJob(unittest.TestCase):
         # AWAITING STATE
         (DataflowJobType.JOB_TYPE_BATCH, DataflowJobStatus.JOB_STATE_PENDING, None, False),
         (DataflowJobType.JOB_TYPE_STREAMING, DataflowJobStatus.JOB_STATE_PENDING, None, False),
+        (None, DataflowJobStatus.JOB_STATE_PENDING, None, False),
         (DataflowJobType.JOB_TYPE_BATCH, DataflowJobStatus.JOB_STATE_PENDING, True, False),
         (DataflowJobType.JOB_TYPE_STREAMING, DataflowJobStatus.JOB_STATE_PENDING, True, False),
+        (None, DataflowJobStatus.JOB_STATE_PENDING, True, False),
         (DataflowJobType.JOB_TYPE_BATCH, DataflowJobStatus.JOB_STATE_PENDING, False, True),
         (DataflowJobType.JOB_TYPE_STREAMING, DataflowJobStatus.JOB_STATE_PENDING, False, True),
+        (None, DataflowJobStatus.JOB_STATE_PENDING, False, True),
     ])
     # fmt: on
     def test_check_dataflow_job_state_wait_until_finished(
         self, job_type, job_state, wait_until_finished, expected_result
     ):
         job = {"id": "id-2", "name": "name-2", "type": job_type, "currentState": job_state}
+        job = {key: job[key] for key in job if job[key] is not None}
         dataflow_job = _DataflowJobsController(
             dataflow=self.mock_dataflow,
             project_number=TEST_PROJECT,
@@ -1345,9 +1349,13 @@ class TestDataflowJob(unittest.TestCase):
             "Google Cloud Dataflow job name-2 has failed\\."),
         (DataflowJobType.JOB_TYPE_STREAMING, DataflowJobStatus.JOB_STATE_FAILED,
          "Google Cloud Dataflow job name-2 has failed\\."),
+        (None, DataflowJobStatus.JOB_STATE_FAILED,
+         "Google Cloud Dataflow job name-2 has failed\\."),
         (DataflowJobType.JOB_TYPE_STREAMING, DataflowJobStatus.JOB_STATE_UNKNOWN,
          "Google Cloud Dataflow job name-2 was unknown state: JOB_STATE_UNKNOWN"),
         (DataflowJobType.JOB_TYPE_BATCH, DataflowJobStatus.JOB_STATE_UNKNOWN,
+         "Google Cloud Dataflow job name-2 was unknown state: JOB_STATE_UNKNOWN"),
+        (None, DataflowJobStatus.JOB_STATE_UNKNOWN,
          "Google Cloud Dataflow job name-2 was unknown state: JOB_STATE_UNKNOWN"),
         (DataflowJobType.JOB_TYPE_BATCH, DataflowJobStatus.JOB_STATE_CANCELLED,
             "Google Cloud Dataflow job name-2 was cancelled\\."),
@@ -1365,6 +1373,7 @@ class TestDataflowJob(unittest.TestCase):
     # fmt: on
     def test_check_dataflow_job_state_terminal_state(self, job_type, job_state, exception_regex):
         job = {"id": "id-2", "name": "name-2", "type": job_type, "currentState": job_state}
+        job = {key: job[key] for key in job if job[key] is not None}
         dataflow_job = _DataflowJobsController(
             dataflow=self.mock_dataflow,
             project_number=TEST_PROJECT,
